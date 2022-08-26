@@ -44,25 +44,54 @@ class UI {
     }
 
     imprimirAlerta(mensaje, tipo) {
-        // Crear el div
-        const divMensaje = document.createElement('div');
-        divMensaje.classList.add('text-center', 'alerta');
-        if(tipo === 'error') {
-            divMensaje.classList.add('alert-danger');
-        } else {
-            divMensaje.classList.add('alert-success')
+        const alerta = document.querySelector('.alerta');
+
+        if(!alerta) {
+            // Crear el div
+            const divMensaje = document.createElement('div');
+            divMensaje.classList.add('text-center', 'alerta');
+            if(tipo === 'error') {
+                divMensaje.classList.add('alert-danger');
+            } else {
+                divMensaje.classList.add('alert-success')
+            }
+
+            // Mensaje de error
+            divMensaje.textContent = mensaje;
+
+            // Insertar en el HTML
+            document.querySelector('.primario').insertBefore(divMensaje, formulario);
+
+            // Quitar del HTML
+            setTimeout(() => {
+                divMensaje.remove();
+            }, 3000);
         }
+    }
 
-        // Mensaje de error
-        divMensaje.textContent = mensaje;
+    AlertaFija(mensaje, tipo) {
+        if(tipo === 'true') {
+            // Crear el div
+            const divMensaje = document.createElement('div');
+            divMensaje.classList.add('text-center', 'alerta-fija', 'alert-danger');
 
-        // Insertar en el HTML
-        document.querySelector('.primario').insertBefore(divMensaje, formulario);
+            // Mensaje de error
+            divMensaje.textContent = mensaje;
+            
+            setTimeout(() => {
+                // Insertar en el HTML
+                document.querySelector('.primario').insertBefore(divMensaje, formulario);            
+            }, 3000);
+        } 
+    }
 
-        // Quitar del HTML
-        setTimeout(() => {
-            divMensaje.remove();
-        }, 3000);
+    AlertaFijaRemove() {
+        const alerta = document.querySelector('.alerta-fija');
+
+        if(alerta) {
+            alerta.remove();
+            formulario.querySelector('button[type="submit"]').disabled = false;
+        }
     }
 
     mostrarGastos(gastos) {
@@ -122,7 +151,7 @@ class UI {
 
         // Si el total es 0 o menor 
         if(restante <= 0) {
-            ui.imprimirAlerta('El presupuesto se ha agotado', 'error');
+            ui.AlertaFija('El presupuesto se ha agotado', 'true');
             formulario.querySelector('button[type="submit"]').disabled = true;
         }
     }
@@ -160,6 +189,9 @@ function agregarGasto(e) {
     } else if (cantidad <= 0 || isNaN(cantidad)) {
         ui.imprimirAlerta('Cantidad No Valida', 'error')
         return;
+    } else if (cantidad > presupuesto.restante) {
+        ui.imprimirAlerta('Fondos Insuficientes', 'error')
+        return;
     } 
 
     // Generar un objeto con el gasto
@@ -190,4 +222,5 @@ function eliminarGasto(id) {
     ui.mostrarGastos(gastos);
     ui.actualizarRestante(restante);
     ui.comprobarPresupuesto(presupuesto);
+    ui.AlertaFijaRemove();
 }
